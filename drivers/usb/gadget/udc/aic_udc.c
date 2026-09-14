@@ -3590,7 +3590,11 @@ static int aic_gg_udc_start(struct usb_gadget *gadget,
 	 * crash in module_add_driver() while it is still being added.
 	 */
 	gg->driver = driver;
-	gg->gadget.dev.of_node = gg->dev->of_node;
+	/* Do not copy the platform of_node to the gadget device: the gadget
+	 * device is probed on the gadget bus and the pinctrl core would try
+	 * to claim the UDC pins a second time (first bind works because the
+	 * node is still NULL, every rebind fails with -EBUSY).
+	 */
 	gg->gadget.speed = USB_SPEED_UNKNOWN;
 
 	/* The calibration resistor value must be set before enabling the USB PHY */
