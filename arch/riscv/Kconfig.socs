@@ -7,6 +7,30 @@ config ARCH_ANDES
 	help
 	  This enables support for Andes SoC platform hardware.
 
+config ARCH_ARTINCHIP
+	bool "ArtInChip RISC-V SoCs"
+	depends on MMU && !XIP_KERNEL
+	select ARCH_HAS_RESET_CONTROLLER
+	select ERRATA_THEAD
+	select RISCV_SBI_CPUIDLE if CPU_IDLE && RISCV_SBI
+	help
+	  This enables support for ArtInChip RISC-V SoC platform hardware,
+	  including the D211 series SoCs.
+
+config MACH_D211
+	bool "ArtInChip D211x SoCs support"
+	depends on ARCH_ARTINCHIP
+	default y
+	help
+	  This enables support for the ArtInChip D211x series SoCs.
+
+config DEBUG_ON_FPGA_BOARD_ARTINCHIP
+	bool "Debug on ArtInChip FPGA board"
+	depends on ARCH_ARTINCHIP
+	default n
+	help
+	  Say Y here if the kernel is running on an ArtInChip FPGA board.
+
 config ARCH_ESWIN
 	bool "ESWIN SoCs"
 	help
