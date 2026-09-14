@@ -39,6 +39,13 @@ config NVMEM_AN8855_EFUSE
 	  This driver can also be built as a module. If so, the module will
 	  be called nvmem-an8855-efuse.
 
+config ARTINCHIP_SID
+	bool "Artinchip SoC eFuse Support"
+	depends on ARCH_ARTINCHIP
+	help
+	  This is a driver to access specified values of Artinchip SoCs from
+	  eFuse/SID.
+
 config NVMEM_APPLE_EFUSES
 	tristate "Apple eFuse support"
 	depends on ARCH_APPLE || COMPILE_TEST
