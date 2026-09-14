@@ -780,6 +780,14 @@ source "drivers/dma/stm32/Kconfig"
 comment "DMA Clients"
 	depends on DMA_ENGINE
 
+config ARTINCHIP_DMA
+	tristate "ArtInChip SoCs DMA support"
+	depends on ARCH_ARTINCHIP || COMPILE_TEST
+	select DMA_ENGINE
+	select DMA_VIRTUAL_CHANNELS
+	help
+	  Support for the DMA engine on ArtInChip SoCs.
+
 config ASYNC_TX_DMA
 	bool "Async_tx: Offload support for the async_tx api"
 	depends on DMA_ENGINE
