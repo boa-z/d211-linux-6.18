@@ -707,13 +707,11 @@ static int aic_pctrl_build_state(struct platform_device *pdev)
 	 * realloc the functions buffer, it should be much less
 	 * than the original buffer.
 	 */
-	ptr = krealloc(pctl->functions,
+	ptr = devm_krealloc(&pdev->dev, pctl->functions,
 				pctl->nfunctions * sizeof(*pctl->functions),
 				GFP_KERNEL);
 	if (!ptr) {
 		dev_err(&pdev->dev, "%s: malloc failed!\n", __func__);
-		kfree(pctl->functions);
-		pctl->functions = NULL;
 		return -ENOMEM;
 	}
 	pctl->functions = ptr;
@@ -728,7 +726,6 @@ static int aic_pctrl_build_state(struct platform_device *pdev)
 				dev_err(&pdev->dev,
 					"%s: look for function failed!\n",
 					__func__);
-				kfree(pctl->functions);
 				return -EINVAL;
 			}
 
