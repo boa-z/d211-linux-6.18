@@ -72,6 +72,32 @@
 
 #define BIT_U8(nr)	BIT_TYPE(u8, nr)
 #define BIT_U16(nr)	BIT_TYPE(u16, nr)
+/* Some common bit operation of a (long type) register */
+#define writel_clrbits(mask, addr)	writel(readl(addr) & ~(mask), addr)
+#define writel_clrbit(bit, addr)	writel_clrbits(bit, addr)
+#define writel_bits(val, mask, shift, addr) \
+	({ \
+		if (val) \
+			writel((readl(addr) & ~(mask)) | ((val) << (shift)), \
+			       addr); \
+		else \
+			writel_clrbits(mask, addr); \
+	})
+#define writel_bit(bit, addr)		writel(readl(addr) | bit, addr)
+#define readl_bits(mask, shift, addr)	((readl(addr) & (mask)) >> (shift))
+#define readl_bit(bit, addr)		((readl(addr) & bit) ? 1 : 0)
+
+/* Some common bit operation of a variable */
+#define clrbits(mask, cur)		((cur) &= ~(mask))
+#define clrbit(bit, cur)		clrbits(bit, cur)
+#define setbits(val, mask, shift, cur) \
+	({ \
+		if (val) \
+			(cur = (cur & ~(mask)) | ((val) << (shift))); \
+		else \
+			clrbits(mask, cur); \
+	})
+
 #define BIT_U32(nr)	BIT_TYPE(u32, nr)
 #define BIT_U64(nr)	BIT_TYPE(u64, nr)
 
