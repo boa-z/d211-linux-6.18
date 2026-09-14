@@ -9,6 +9,47 @@ config SENSORS_LIS3LV02D
 	tristate
 	depends on INPUT
 
+config ARTINCHIP_ADCIM
+	bool "ADCIM driver for Artinchip SoC"
+	depends on ARCH_ARTINCHIP
+	help
+	  ADC Interface Management is the base module of ADC/THS/RTP
+	  in Artinchip SoC. So, select this if you want to use them first.
+
+config ARTINCHIP_ADCIM_DM
+	bool "ADCIM DM driver for FPGA"
+	depends on ARTINCHIP_ADCIM && (DEBUG_ON_FPGA_BOARD_ARTINCHIP || VIRTIO_BLK)
+	help
+	  It's a ADC Digital Module, which can generate signal for ADC/THS/RTP
+	  in FPGA environment. So, select this if you want to use them first.
+
+config ARTINCHIP_MTOP
+	bool "MTOP driver for Artinchip SoC"
+	depends on ARCH_ARTINCHIP
+	default n
+	help
+	  Select this if you want to know DDR bandwidth.
+
+config ARTINCHIP_PBUS
+	bool "PBUS driver for Artinchip SoC"
+	depends on ARCH_ARTINCHIP
+	help
+	  Artinchip SoC can access the external FPGA or SRAM by PBUS.
+	  So, select this if you want to use it.
+
+config ARTINCHIP_SYSCFG
+	bool "Syscfg driver for Artinchip SoC"
+	depends on ARCH_ARTINCHIP
+	help
+	  Syscfg should enable some configuration for USB/GMAC before
+	  initialization. Select this if you want to use them.
+
+config ARTINCHIP_WRI
+	bool "WRI driver for ArtInChip SoC"
+	depends on ARCH_ARTINCHIP
+	help
+	  Select this if you want to use them.
+
 config AD525X_DPOT
 	tristate "Analog Devices Digital Potentiometers"
 	depends on (I2C || SPI) && SYSFS
