@@ -3978,13 +3978,12 @@ static int aic_udc_probe(struct platform_device *dev)
 	}
 
 	/* interrupt */
-	res = platform_get_resource(dev, IORESOURCE_IRQ, 0);
-	if (!res) {
+	gg->irq = platform_get_irq(dev, 0);
+	if (gg->irq < 0) {
 		dev_err(&dev->dev, "No IRQ resource found!\n");
-		ret = -ENODEV;
+		ret = gg->irq;
 		goto err_gadget;
 	}
-	gg->irq = res->start;
 	ret = devm_request_irq(gg->dev, gg->irq,
 			       aic_udc_irq, IRQF_SHARED,
 			       dev_name(gg->dev), gg);
