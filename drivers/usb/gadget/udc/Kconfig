@@ -30,6 +30,12 @@ menu "USB Peripheral Controller"
 # Integrated controllers
 #
 
+config USB_AIC_UDC
+	tristate "ArtinChip USB2.0 Device Controller"
+	help
+	   ArtInChip Socs include a high speed USB2.0 device controller,
+	   which can be configured as high speed or full speed USB peripheral.
+
 config USB_AT91
 	tristate "Atmel AT91 USB Device Port"
 	depends on ARCH_AT91
