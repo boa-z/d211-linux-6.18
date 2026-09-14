@@ -29,6 +29,12 @@ config RESET_ASPEED
 	help
 	  This enables the reset controller driver for AST2700.
 
+config RESET_ARTINCHIP
+	bool "Artinchip Reset Driver"
+	default ARCH_ARTINCHIP
+	help
+	  This enables the reset driver for Artinchip SoCs.
+
 config RESET_ATH79
 	bool "AR71xx Reset Driver" if COMPILE_TEST
 	default ATH79
