@@ -69,6 +69,23 @@ config MTD_BLOCK_RO
 	  You do not need this option for use with the DiskOnChip devices. For
 	  those, enable NFTL support (CONFIG_NFTL) instead.
 
+config NAND_BBT_MANAGE
+	bool "Use bbt partition to manage bad blocks for fast boot in nand"
+	depends on MTD && MTD_SPI_NAND
+	help
+	  ALL nand bad block is managed uniformly in bbt partition.
+	  compared with dispersion. it can save bad block read time.
+
+config NAND_BBT_OFFSET
+	hex "Offset of bbt in nand"
+	depends on NAND_BBT_MANAGE
+	default "0xf00000"
+
+config NAND_BBT_RANGE
+	hex "Range of bbt in nand"
+	depends on NAND_BBT_MANAGE
+	default "0x40000"
+
 comment "Note that in some cases UBI block is preferred. See MTD_UBI_BLOCK."
 	depends on MTD_BLOCK || MTD_BLOCK_RO
 
