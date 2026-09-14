@@ -3585,7 +3585,10 @@ static int aic_gg_udc_start(struct usb_gadget *gadget,
 	}
 
 	WARN_ON(gg->driver);
-	driver->driver.bus = NULL;
+	/* Since 6.18 the gadget core registers gadget drivers on the
+	 * "gadget" bus; clearing driver.bus here makes the driver core
+	 * crash in module_add_driver() while it is still being added.
+	 */
 	gg->driver = driver;
 	gg->gadget.dev.of_node = gg->dev->of_node;
 	gg->gadget.speed = USB_SPEED_UNKNOWN;
