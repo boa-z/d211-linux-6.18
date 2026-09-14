@@ -22,6 +22,20 @@ config 88PM886_GPADC
 	  To compile this driver as a module, choose M here: the module will be
 	  called 88pm886-gpadc.
 
+config ARTINCHIP_GPAI
+	tristate "Artinchip GPAI driver"
+	depends on ARCH_ARTINCHIP && ARTINCHIP_ADCIM
+	depends on OF
+	help
+	  Enable Artinchip's GPAI driver.
+
+config ARTINCHIP_PSADC
+	tristate "Artinchip PSADC driver"
+	depends on ARCH_ARTINCHIP && ARTINCHIP_ADCIM
+	depends on OF
+	help
+	  Enable Artinchip's PSADC driver.
+
 config AB8500_GPADC
 	bool "ST-Ericsson AB8500 GPADC driver"
 	depends on AB8500_CORE && REGULATOR_AB8500
