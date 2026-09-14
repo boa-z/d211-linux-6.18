@@ -136,6 +136,21 @@ config SPI_AR934X
 	  This enables support for the SPI controller present on the
 	  Qualcomm Atheros AR934X/QCA95XX SoCs.
 
+config SPI_ARTINCHIP
+	tristate "Artinchip SPI controller"
+	depends on ARCH_ARTINCHIP || COMPILE_TEST
+	depends on RESET_CONTROLLER
+	help
+	  This enables using the SPI controller on the Artinchip SoCs.
+
+config SPI_SUPPORT_QUADIO_ARTINCHIP
+	bool "Artinchip SPI Support QIO/QPI"
+	depends on SPI_ARTINCHIP
+	default n
+	help
+	  Select to enable SPI NAND/NOR to support QUAD IO and QPI on
+	  the Artinchip SoCs.
+
 config SPI_ATH79
 	tristate "Atheros AR71XX/AR724X/AR913X SPI controller driver"
 	depends on ATH79 || COMPILE_TEST
