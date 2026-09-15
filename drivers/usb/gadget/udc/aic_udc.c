@@ -68,6 +68,12 @@ static int aic_ep_disable_nolock(struct usb_ep *ep);
 static int aic_set_test_mode(struct aic_usb_gadget *gg, int testmode);
 static void aic_gg_set_usb_res(void __iomem *ctl_reg, u32 resis);
 
+/* Select USB0 PHY device mode (the OTG host driver selects host mode,
+ * but it is not ported yet, so the PHY would stay in the U-Boot state /
+ * default and the host may detect the wrong speed).
+ */
+extern void syscfg_usb_phy0_sw_host(int sw);
+
 #ifdef CONFIG_DEBUG_FS
 
 #define print_param(_seq, _ptr, _param) \
@@ -3608,6 +3614,12 @@ static int aic_gg_udc_start(struct usb_gadget *gadget,
 
 	/* The calibration resistor value must be set before enabling the USB PHY */
 	aic_gg_set_usb_res(gg->params.usb_res_cfg.addr, gg->params.usb_res_cfg.resis);
+
+	/* USB0 is a shared host/device PHY; make sure it is in device mode
+	 * before the pull-up is enabled, otherwise the host can detect the
+	 * wrong (low) speed and fail the enumeration. */
+	syscfg_usb_phy0_sw_host(0);
+
 	ret = aic_low_hw_enable(gg);
 	if (ret) {
 		dev_err(gg->dev, "%s: aic_low_hw_enable %d\n", __func__, ret);
