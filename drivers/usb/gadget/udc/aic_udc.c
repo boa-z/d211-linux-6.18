@@ -1703,10 +1703,17 @@ static void aic_ep0_process_control(struct aic_usb_gadget *gg,
 		switch (ctrl->bRequest) {
 		case USB_REQ_SET_ADDRESS:
 			gg->connected = 1;
-			/* The address is written immediately, like the U-Boot
-			 * driver for the same controller does; the core applies
-			 * it after the ongoing control transfer.
+			/*
+			 * Arm the status reply first: as soon as the address
+			 * is written the controller stops accepting the
+			 * status IN token which the host still sends to the
+			 * old address.  Arming the ZLP before the write
+			 * guarantees the status stage completes, while the
+			 * write still lands well before the host's next
+			 * request.
 			 */
+			ret = aic_ep0_enqueue_reply(gg, ep0, NULL, 0);
+
 			reg = aic_readl(gg, USBDEVCONF);
 			reg &= ~USBDEVCONF_DEVADDR_MASK;
 			reg |= (le16_to_cpu(ctrl->wValue) <<
@@ -1716,8 +1723,6 @@ static void aic_ep0_process_control(struct aic_usb_gadget *gg,
 
 			dev_info(gg->dev, "new address %d (USBDEVCONF=%08x)\n",
 				 ctrl->wValue, aic_readl(gg, USBDEVCONF));
-
-			ret = aic_ep0_enqueue_reply(gg, ep0, NULL, 0);
 			return;
 
 		case USB_REQ_GET_STATUS:
