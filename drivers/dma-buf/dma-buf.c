@@ -26,6 +26,7 @@
 #include <linux/sync_file.h>
 #include <linux/poll.h>
 #include <linux/dma-resv.h>
+#include <linux/dma-map-ops.h>
 #include <linux/mm.h>
 #include <linux/mount.h>
 #include <linux/pseudo_fs.h>
@@ -379,6 +380,111 @@ static __poll_t dma_buf_poll(struct file *file, poll_table *poll)
 	return events;
 }
 
+#if IS_ENABLED(CONFIG_ARCH_ARTINCHIP) && IS_ENABLED(CONFIG_RISCV)
+static void dma_buf_sync_phys_range(struct dma_buf_range *range, bool wback_inv)
+{
+	unsigned long height = range->size;
+	unsigned long start, end;
+	int i;
+
+	start = range->start;
+	end = start + range->width;
+
+	for (i = 0; i < height; i++) {
+		if (wback_inv)
+			arch_sync_dma_for_cpu(start, end - start,
+					      DMA_FROM_DEVICE);
+		else
+			arch_sync_dma_for_device(start, end - start,
+						 DMA_TO_DEVICE);
+		start += range->stride;
+		end = start + range->width;
+	}
+}
+
+static int dma_buf_sync_range(struct dma_buf_range *range)
+{
+	if (range->flags & DMA_BUF_SYNC_PHY_ADDR) {
+		if (range->flags & DMA_BUF_SYNC_WB_INV_RANGE)
+			dma_buf_sync_phys_range(range, true);
+		else
+			dma_buf_sync_phys_range(range, false);
+
+		return 0;
+	}
+
+	/*
+	 * The ArtInChip user space only ever syncs physical ranges (the MPP
+	 * and GE engines program the buffers by physical address), the user
+	 * virtual mapping path of the 5.10 BSP is not needed here.
+	 */
+	pr_warn_once("%s: only physical ranges are supported\n", __func__);
+	return -EOPNOTSUPP;
+}
+
+static int dma_buf_basic_get_phy_addr(struct dma_buf *dmabuf, unsigned int *phy_addr)
+{
+	struct device *dev;
+	dma_addr_t sg_addr;
+	struct dma_buf_attachment *attachment;
+	struct sg_table *sgt;
+	int err = 0;
+	static u64 dummy_mask;
+
+	dev = kzalloc(sizeof(*dev), GFP_KERNEL);
+	if (!dev) {
+		err = -ENOMEM;
+		pr_info("Failed to alloc device\n");
+		goto err_alloc;
+	}
+
+	dummy_mask = DMA_BIT_MASK(32);
+	dev->dma_mask = &dummy_mask;
+	dma_set_coherent_mask(dev, dummy_mask);
+	dev_set_name(dev, "dummy_dev_for_sg");
+
+	attachment = dma_buf_attach(dmabuf, dev);
+	if (IS_ERR(attachment)) {
+		err = PTR_ERR(attachment);
+		pr_info("Failed to attach %d\n", err);
+		goto err_buf_attach;
+	}
+
+	sgt = dma_buf_map_attachment(attachment, DMA_BIDIRECTIONAL);
+	if (IS_ERR(sgt)) {
+		err = PTR_ERR(sgt);
+		pr_info("Failed to attachement%d\n", err);
+		goto err_buf_attachment;
+	}
+
+	sg_addr = sg_dma_address(sgt->sgl);
+	*phy_addr = (unsigned int)sg_addr;
+	dma_buf_unmap_attachment(attachment, sgt, DMA_BIDIRECTIONAL);
+
+err_buf_attachment:
+	dma_buf_detach(dmabuf, attachment);
+err_buf_attach:
+	kfree(dev);
+err_alloc:
+	return err;
+}
+
+static int dma_buf_get_phy_addr(struct dma_buf *dmabuf, unsigned int *phy_addr)
+{
+	int ret;
+
+	if (WARN_ON(!dmabuf))
+		return -EINVAL;
+
+	if (dmabuf->ops->get_phy_addr)
+		ret = dmabuf->ops->get_phy_addr(dmabuf, phy_addr);
+	else
+		ret = dma_buf_basic_get_phy_addr(dmabuf, phy_addr);
+
+	return ret;
+}
+#endif /* CONFIG_ARCH_ARTINCHIP && CONFIG_RISCV */
+
 /**
  * dma_buf_set_name - Set a name to a specific dma_buf to track the usage.
  * It could support changing the name of the dma-buf if the same
@@ -392,6 +498,7 @@ static __poll_t dma_buf_poll(struct file *file, poll_table *poll)
  * devices, return -EBUSY.
  *
  */
+
 static long dma_buf_set_name(struct dma_buf *dmabuf, const char __user *buf)
 {
 	char *name = strndup_user(buf, DMA_BUF_NAME_LEN);
@@ -518,6 +625,10 @@ static long dma_buf_ioctl(struct file *file,
 	struct dma_buf *dmabuf;
 	struct dma_buf_sync sync;
 	enum dma_data_direction direction;
+#if IS_ENABLED(CONFIG_ARCH_ARTINCHIP) && IS_ENABLED(CONFIG_RISCV)
+	struct dma_buf_range range;
+	unsigned int phy_addr;
+#endif
 	int ret;
 
 	dmabuf = file->private_data;
@@ -554,6 +665,25 @@ static long dma_buf_ioctl(struct file *file,
 	case DMA_BUF_SET_NAME_A:
 	case DMA_BUF_SET_NAME_B:
 		return dma_buf_set_name(dmabuf, (const char __user *)arg);
+
+#if IS_ENABLED(CONFIG_ARCH_ARTINCHIP) && IS_ENABLED(CONFIG_RISCV)
+	case DMA_BUF_IOCTL_SYNC_RANGE:
+		if (copy_from_user(&range, (void __user *)arg, sizeof(range)))
+			return -EFAULT;
+
+		return dma_buf_sync_range(&range);
+
+	case DMA_BUF_IOCTL_GET_PHY_ADDR:
+		ret = dma_buf_get_phy_addr(dmabuf, &phy_addr);
+		if (ret)
+			ret = -EFAULT;
+
+		if (copy_to_user((void __user *)arg, &phy_addr,
+				 sizeof(unsigned int)))
+			ret = -EFAULT;
+
+		return ret;
+#endif
 
 #if IS_ENABLED(CONFIG_SYNC_FILE)
 	case DMA_BUF_IOCTL_EXPORT_SYNC_FILE:

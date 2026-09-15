@@ -83,6 +83,25 @@ struct dma_buf_sync {
 #define DMA_BUF_SYNC_VALID_FLAGS_MASK \
 	(DMA_BUF_SYNC_RW | DMA_BUF_SYNC_END)
 
+/*
+ * ArtInChip extensions: cache maintenance on a (physical) buffer range.
+ * The flags are kept identical to the 5.10 BSP so that the AIC user space
+ * (MPP, LVGL) built against those headers keeps working.
+ */
+struct dma_buf_range {
+	__u64 start;
+	__u64 size;
+	__u64 width;
+	__u64 stride;
+	__u64 flags;
+};
+
+#define DMA_BUF_SYNC_WB_RANGE		(1 << 0)
+#define DMA_BUF_SYNC_INV_RANGE		(2 << 0)
+#define DMA_BUF_SYNC_WB_INV_RANGE	(1 << 2)
+#define DMA_BUF_SYNC_RANGE_CROP		(1 << 4)
+#define DMA_BUF_SYNC_PHY_ADDR		(1 << 5)
+
 #define DMA_BUF_NAME_LEN	32
 
 /**
@@ -169,6 +188,10 @@ struct dma_buf_import_sync_file {
 
 #define DMA_BUF_BASE		'b'
 #define DMA_BUF_IOCTL_SYNC	_IOW(DMA_BUF_BASE, 0, struct dma_buf_sync)
+
+/* ArtInChip extensions, kept compatible with the 5.10 BSP ABI */
+#define DMA_BUF_IOCTL_SYNC_RANGE _IOW(DMA_BUF_BASE, 0x2, struct dma_buf_range)
+#define DMA_BUF_IOCTL_GET_PHY_ADDR _IOR(DMA_BUF_BASE, 0x3, unsigned int)
 
 /* 32/64bitness of this uapi was botched in android, there's no difference
  * between them in actual uapi, they're just different numbers.

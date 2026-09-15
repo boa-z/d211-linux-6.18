@@ -197,6 +197,17 @@ config CMA_SIZE_MBYTES
 	  default, but it can be enabled by passing cma=size[MG] to the kernel.
 
 
+config CMA_MPP_SIZE_MBYTES
+	int "Size in Mega Bytes for MPP Heap"
+	depends on !CMA_SIZE_SEL_PERCENTAGE && DMABUF_HEAPS_MPP
+	range 0 CMA_SIZE_MBYTES
+	default 8
+	help
+	  Defines the size (in MiB) of the default memory area for CMA MPP Heap
+	  from Contiguous Memory Allocator. This must to be less than
+	  CMA_SIZE_MBYTES. If the size of 0 is selected, MPP Heap is disabled
+	  by default.
+
 config CMA_SIZE_PERCENTAGE
 	int "Percentage of total memory"
 	depends on !CMA_SIZE_SEL_MBYTES
