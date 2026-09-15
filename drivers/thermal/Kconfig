@@ -252,6 +252,15 @@ config THERMAL_MMIO
 	  register or shared memory, is a potential candidate to work with this
 	  driver.
 
+config ARTINCHIP_THERMAL
+	tristate "Artinchip thermal driver"
+	depends on ARCH_ARTINCHIP && ARTINCHIP_ADCIM
+	depends on HAS_IOMEM
+	depends on OF
+	default y
+	help
+	  Enable Artinchip's thermal sensor driver.
+
 config HISI_THERMAL
 	tristate "Hisilicon thermal driver"
 	depends on ARCH_HISI || COMPILE_TEST
