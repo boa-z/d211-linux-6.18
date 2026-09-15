@@ -84,6 +84,33 @@ config PWM_ARGON_FAN_HAT
 	  To compile this driver as a module, choose M here: the module
 	  will be called pwm-argon-fan-hat.
 
+config PWM_ARTINCHIP
+	tristate "ArtInChip PWM support"
+	depends on ARCH_ARTINCHIP
+	help
+	  PWM controller driver for ArtInChip SoC.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called aic-pwm.
+
+config EPWM_ARTINCHIP
+	tristate "ArtInChip EPWM support"
+	depends on ARCH_ARTINCHIP
+	help
+	  EPWM controller driver for ArtInChip SoC.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called aic-epwm.
+
+config CAP_ARTINCHIP
+	tristate "ArtInChip CAP support"
+	depends on ARCH_ARTINCHIP
+	help
+	  CAP controller driver for ArtInChip SoC.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called aic-cap.
+
 config PWM_ATMEL
 	tristate "Atmel PWM support"
 	depends on ARCH_AT91 || COMPILE_TEST
