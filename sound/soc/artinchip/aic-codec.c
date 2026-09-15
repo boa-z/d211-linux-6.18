@@ -219,6 +219,9 @@
 #define DEFAULT_AUDIO_FREQ					(24576000)
 static struct gpio_desc *gpiod_pa;
 
+/* Filled in by the platform probe, used by the component probe. */
+static struct aic_codec *g_aic_codec;
+
 struct aic_codec {
 	struct device *dev;
 	struct regmap *regmap;
@@ -909,8 +912,11 @@ static const struct snd_soc_component_driver aic_codec_component = {
 
 static int aic_codec_component_probe(struct snd_soc_component *component)
 {
-	struct aic_codec *codec = dev_get_drvdata(component->dev);
+	struct aic_codec *codec = g_aic_codec;
 	struct snd_soc_dai *dai;
+
+	if (!codec)
+		return -EPROBE_DEFER;
 
 	for_each_component_dais(component, dai) {
 	if (!dai->id) {
@@ -1149,6 +1155,7 @@ static int aic_codec_probe(struct platform_device *pdev)
 	if (!codec)
 		return -ENOMEM;
 
+	g_aic_codec = codec;
 	codec->dev = &pdev->dev;
 
 	codec->res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
