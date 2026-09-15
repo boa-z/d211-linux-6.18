@@ -163,6 +163,13 @@ static int __add_mpp_heap(struct cma *cma, void *data)
 		return -ENOMEM;
 	mpp_heap->cma = cma;
 
+	/* Grab the pool before publishing the heap so that a failure here
+	 * cannot leave a registered heap with dangling driver data. */
+	if (__add_gen_pool(mpp_heap)) {
+		kfree(mpp_heap);
+		return -ENOMEM;
+	}
+
 	exp_info.name = "mpp";
 	exp_info.ops = &mpp_heap_ops;
 	exp_info.priv = mpp_heap;
@@ -171,13 +178,11 @@ static int __add_mpp_heap(struct cma *cma, void *data)
 	if (IS_ERR(mpp_heap->heap)) {
 		int ret = PTR_ERR(mpp_heap->heap);
 
+		gen_pool_destroy(mpp_heap->pool);
+		cma_release(mpp_heap->cma, mpp_heap->cma_pages,
+			    mpp_heap->nr_pages);
 		kfree(mpp_heap);
 		return ret;
-	}
-
-	if (__add_gen_pool(mpp_heap)) {
-		kfree(mpp_heap);
-		return -ENOMEM;
 	}
 #ifdef CONFIG_MPP_DEBUGFS
 	mpp_debugfs = mpp_heap;
