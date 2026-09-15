@@ -289,6 +289,13 @@ config USB_EHCI_TEGRA
 	  Enable support for the internal USB Host Controllers
 	  found in NVIDIA Tegra SoCs. The controllers are EHCI compliant.
 
+config USB_EHCI_HCD_AIC
+	tristate "Support for Artinchip on-chip EHCI USB controller"
+	depends on ARCH_ARTINCHIP && OF
+	help
+	  Enable support for the on-chip EHCI controller found on
+	  Artinchip Family SoC's.
+
 config USB_EHCI_HCD_PPC_OF
 	bool "EHCI support for PPC USB controller on OF platform bus"
 	depends on PPC
@@ -423,6 +430,13 @@ config USB_OHCI_HCD
 	  module will be called ohci-hcd.
 
 if USB_OHCI_HCD
+
+config USB_OHCI_HCD_AIC
+	tristate "Support for Artinchip on-chip OHCI USB controller"
+	depends on USB_EHCI_HCD_AIC
+	help
+	  Enable support for the on-chip OHCI controller found on
+	  Artinchip Family SoC's.
 
 config USB_OHCI_HCD_OMAP1
 	tristate "OHCI support for OMAP1/2 chips"
