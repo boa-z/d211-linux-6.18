@@ -1697,6 +1697,10 @@ static void aic_ep0_process_control(struct aic_usb_gadget *gg,
 		switch (ctrl->bRequest) {
 		case USB_REQ_SET_ADDRESS:
 			gg->connected = 1;
+			/* The address is written immediately, like the U-Boot
+			 * driver for the same controller does; the core applies
+			 * it after the ongoing control transfer.
+			 */
 			reg = aic_readl(gg, USBDEVCONF);
 			reg &= ~USBDEVCONF_DEVADDR_MASK;
 			reg |= (le16_to_cpu(ctrl->wValue) <<
@@ -1704,7 +1708,8 @@ static void aic_ep0_process_control(struct aic_usb_gadget *gg,
 				 USBDEVCONF_DEVADDR_MASK;
 			aic_writel(gg, reg, USBDEVCONF);
 
-			dev_info(gg->dev, "new address %d\n", ctrl->wValue);
+			dev_info(gg->dev, "new address %d (USBDEVCONF=%08x)\n",
+				 ctrl->wValue, aic_readl(gg, USBDEVCONF));
 
 			ret = aic_ep0_enqueue_reply(gg, ep0, NULL, 0);
 			return;
@@ -1777,6 +1782,7 @@ static void aic_ep0_enqueue_setup(struct aic_usb_gadget *gg)
 	gg->eps_out[0]->dir_in = 0;
 	gg->eps_out[0]->send_zlp = 0;
 	gg->ep0_state = AIC_EP0_SETUP;
+	gg->setup_handled = false;
 
 	ret = aic_ep_queue_request_nolock(&gg->eps_out[0]->ep, req, GFP_ATOMIC);
 	if (ret < 0)
@@ -2290,16 +2296,19 @@ static void aic_epint_irq(struct aic_usb_gadget *gg, unsigned int idx,
 
 		if (idx == 0) {
 			/*
-			 * this is the notification we've received a
-			 * setup packet. In non-DMA mode we'd get this
-			 * from the RXFIFO, instead we need to process
-			 * the setup here.
+			 * This is the notification that a setup packet has
+			 * been received.  On this controller the interrupt
+			 * can be reported on either the IN or the OUT side
+			 * of EP0, and sometimes only on the IN side (an
+			 * IN-only notification used to be dropped here,
+			 * which lost the whole control transfer).  Handle
+			 * the setup whichever side reports it, but only
+			 * once per arming of the setup request.
 			 */
-
-			if (dir_in)
-				WARN_ON_ONCE(1);
-			else
+			if (!gg->setup_handled) {
+				gg->setup_handled = true;
 				aic_epint_handle_outdone(gg, 0);
+			}
 		}
 	}
 

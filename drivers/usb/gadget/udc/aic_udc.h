@@ -166,6 +166,7 @@ struct aic_usb_gadget {
 	u32				tx_fifo_map;
 	unsigned int			enabled:1;
 	unsigned int			connected:1;
+	bool				setup_handled;
 	unsigned int			remote_wakeup_allowed:1;
 	unsigned int			delayed_status : 1;
 
