@@ -87,6 +87,10 @@ if FB_CORE || SGI_NEWPORT_CONSOLE
 
 endif
 
+menu "ArtInChip Graphics"
+source "drivers/video/artinchip/Kconfig"
+endmenu
+
 source "drivers/gpu/trace/Kconfig"
 
 endmenu
