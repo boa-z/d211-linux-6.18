@@ -7,6 +7,7 @@
 # (e. g. LC_ALL=C sort Makefile)
 obj-y += allegro-dvt/
 obj-y += amlogic/
+obj-$(CONFIG_VIDEO_ARTINCHIP_DVP) += artinchip/
 obj-y += amphion/
 obj-y += aspeed/
 obj-y += atmel/
