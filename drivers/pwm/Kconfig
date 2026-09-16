@@ -84,6 +84,39 @@ config PWM_ARGON_FAN_HAT
 	  To compile this driver as a module, choose M here: the module
 	  will be called pwm-argon-fan-hat.
 
+config PWM_ARTINCHIP
+	tristate "ArtInChip PWM support"
+	depends on ARCH_ARTINCHIP
+	help
+	  PWM controller driver for ArtInChip SoC.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called pwm-artinchip.
+	  The PWM outputs drive LCD backlight and buzzer circuits on
+	  ArtInChip boards.
+
+config EPWM_ARTINCHIP
+	tristate "ArtInChip EPWM support"
+	depends on ARCH_ARTINCHIP
+	help
+	  EPWM controller driver for ArtInChip SoC.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called epwm-artinchip.
+	  EPWM adds enhanced capture and compare features over the base
+	  PWM block. If unsure, say N.
+
+config CAP_ARTINCHIP
+	tristate "ArtInChip CAP support"
+	depends on ARCH_ARTINCHIP
+	help
+	  CAP controller driver for ArtInChip SoC.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called cap-artinchip.
+	  CAP measures input signal frequency and duty cycle. It is only
+	  needed for capture use cases, so say N if unsure.
+
 config PWM_ATMEL
 	tristate "Atmel PWM support"
 	depends on ARCH_AT91 || COMPILE_TEST
