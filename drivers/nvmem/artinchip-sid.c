@@ -130,6 +130,12 @@ static int aic_sid_probe(struct platform_device *pdev)
 	nvmem_cfg->stride = 4;
 	nvmem_cfg->priv = sid;
 	nvmem_cfg->reg_read = aic_sid_read;
+	/*
+	 * 6.18 only registers the cells described by the device tree child
+	 * nodes (chipid, t0_low, ldo30_bg_ctrl, ...) when the driver asks
+	 * for the legacy binding explicitly.
+	 */
+	nvmem_cfg->add_legacy_fixed_of_cells = true;
 	nvmem = devm_nvmem_register(dev, nvmem_cfg);
 	if (IS_ERR(nvmem))
 		return PTR_ERR(nvmem);
