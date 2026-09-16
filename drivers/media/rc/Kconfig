@@ -229,6 +229,17 @@ config IR_IGUANA
 	   To compile this driver as a module, choose M here: the module will
 	   be called iguanair.
 
+config IR_ARTINCHIP
+	tristate "ArtInChip CIR receiver/transmitter"
+	depends on ARCH_ARTINCHIP || COMPILE_TEST
+	help
+	  Say Y if you want to use the ArtInChip CIR controller.
+
+	  To compile this driver as a module, choose M here: the module will
+	  be called artinchip-cir.
+	  The controller handles both IR receive (NEC and others) and IR
+	  transmit for remote-control applications.
+
 config IR_IMON
 	tristate "SoundGraph iMON Receiver and Display"
 	depends on USB
