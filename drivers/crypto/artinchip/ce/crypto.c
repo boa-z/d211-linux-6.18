@@ -398,19 +398,33 @@ static int aic_crypto_probe(struct platform_device *pdev)
 	ret = aic_crypto_skcipher_accelerator_init(ce_dev);
 	if (ret) {
 		dev_err(ce_dev->dev, "Failed to init skcipher accelerator\n");
-		return ret;
+		goto err_pm;
 	}
 	ret = aic_crypto_akcipher_accelerator_init(ce_dev);
 	if (ret) {
 		dev_err(ce_dev->dev, "Failed to init akcipher accelerator\n");
-		return ret;
+		goto err_skcipher;
 	}
 	ret = aic_crypto_hash_accelerator_init(ce_dev);
 	if (ret) {
 		dev_err(ce_dev->dev, "Failed to init hash accelerator\n");
-		return ret;
+		goto err_akcipher;
 	}
 
+	return 0;
+
+err_akcipher:
+	/*
+	 * A failed accelerator init must not leave the algorithms that were
+	 * registered before it behind: the crypto API would keep handing out
+	 * tfms whose driver data is freed with this device.
+	 */
+	aic_crypto_akcipher_accelerator_exit(ce_dev);
+err_skcipher:
+	aic_crypto_skcipher_accelerator_exit(ce_dev);
+err_pm:
+	pm_runtime_disable(dev);
+	clk_disable_unprepare(ce_dev->clk);
 	return ret;
 }
 

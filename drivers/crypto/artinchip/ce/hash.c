@@ -898,7 +898,6 @@ static struct aic_hash_alg hash_algs[] = {
 						CRYPTO_ALG_TYPE_AHASH,
 				.cra_blocksize = MD5_HMAC_BLOCK_SIZE,
 				.cra_ctxsize = sizeof(struct aic_hash_tfm_ctx),
-				.cra_alignmask = 3,
 				.cra_module = THIS_MODULE,
 			}
 		}
@@ -926,7 +925,6 @@ static struct aic_hash_alg hash_algs[] = {
 						CRYPTO_ALG_TYPE_AHASH,
 				.cra_blocksize = SHA1_BLOCK_SIZE,
 				.cra_ctxsize = sizeof(struct aic_hash_tfm_ctx),
-				.cra_alignmask = 3,
 				.cra_module = THIS_MODULE,
 			}
 		}
@@ -954,7 +952,6 @@ static struct aic_hash_alg hash_algs[] = {
 						CRYPTO_ALG_TYPE_AHASH,
 				.cra_blocksize = SHA224_BLOCK_SIZE,
 				.cra_ctxsize = sizeof(struct aic_hash_tfm_ctx),
-				.cra_alignmask = 3,
 				.cra_module = THIS_MODULE,
 			}
 		}
@@ -982,7 +979,6 @@ static struct aic_hash_alg hash_algs[] = {
 						CRYPTO_ALG_TYPE_AHASH,
 				.cra_blocksize = SHA256_BLOCK_SIZE,
 				.cra_ctxsize = sizeof(struct aic_hash_tfm_ctx),
-				.cra_alignmask = 3,
 				.cra_module = THIS_MODULE,
 			}
 		}
@@ -1010,7 +1006,6 @@ static struct aic_hash_alg hash_algs[] = {
 						CRYPTO_ALG_TYPE_AHASH,
 				.cra_blocksize = SHA384_BLOCK_SIZE,
 				.cra_ctxsize = sizeof(struct aic_hash_tfm_ctx),
-				.cra_alignmask = 3,
 				.cra_module = THIS_MODULE,
 			}
 		}
@@ -1038,7 +1033,6 @@ static struct aic_hash_alg hash_algs[] = {
 						CRYPTO_ALG_TYPE_AHASH,
 				.cra_blocksize = SHA512_BLOCK_SIZE,
 				.cra_ctxsize = sizeof(struct aic_hash_tfm_ctx),
-				.cra_alignmask = 3,
 				.cra_module = THIS_MODULE,
 			}
 		}
@@ -1067,7 +1061,6 @@ static struct aic_hash_alg hash_algs[] = {
 						CRYPTO_ALG_TYPE_AHASH,
 				.cra_blocksize = SHA1_BLOCK_SIZE,
 				.cra_ctxsize = sizeof(struct aic_hash_tfm_ctx),
-				.cra_alignmask = 3,
 				.cra_module = THIS_MODULE,
 			}
 		}
@@ -1096,7 +1089,6 @@ static struct aic_hash_alg hash_algs[] = {
 						CRYPTO_ALG_TYPE_AHASH,
 				.cra_blocksize = SHA256_BLOCK_SIZE,
 				.cra_ctxsize = sizeof(struct aic_hash_tfm_ctx),
-				.cra_alignmask = 3,
 				.cra_module = THIS_MODULE,
 			}
 		}
