@@ -3295,6 +3295,15 @@ static int artinchip_mmc_probe(struct platform_device *pdev)
 	artinchip_mmc_init_dma(host);
 
 	/* Clear the interrupts for the host controller */
+	/*
+	 * The command/data timeout timers may still be armed; if they fired
+	 * after the driver data is freed they would touch freed memory.
+	 * (Unbinding this driver used to panic the kernel because of that.)
+	 */
+	timer_delete_sync(&host->cto_timer);
+	timer_delete_sync(&host->dto_timer);
+	timer_delete_sync(&host->cmd11_timer);
+
 	mci_writel(host, SDMC_OINTST, 0xFFFFFFFF);
 	mci_writel(host, SDMC_INTEN, 0); /* disable all mmc interrupt first */
 
