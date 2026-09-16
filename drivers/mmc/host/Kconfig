@@ -884,6 +884,16 @@ config MMC_DW_STARFIVE
 	  Synopsys DesignWare Memory Card Interface driver. Select this option
 	  for platforms based on StarFive JH7110 SoC.
 
+config MMC_ARTINCHIP
+	tristate "Artinchip Memory Card Interface"
+	depends on ARCH_ARTINCHIP
+	help
+	  This selects support for Artinchip SoC specific extensions to the
+	  Artinchip Memory Card Interface driver.
+	  It drives the SDMC0/1/2 controllers for SD cards and SDIO WiFi.
+	  To compile as a module, choose M here: the module will be
+	  called artinchip_mmc.
+
 config MMC_SH_MMCIF
 	tristate "SuperH Internal MMCIF support"
 	depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
