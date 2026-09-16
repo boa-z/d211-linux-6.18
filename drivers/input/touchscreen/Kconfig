@@ -1424,4 +1424,15 @@ config TOUCHSCREEN_HIMAX_HX83112B
 	  To compile this driver as a module, choose M here: the
 	  module will be called himax_hx83112b.
 
+config TOUCHSCREEN_ARTINCHIP
+	tristate "ArtInChip RTP touchscreen"
+	depends on ARCH_ARTINCHIP
+	help
+	  Say Y here to enable the ArtInChip resistive touch panel support.
+	  If unsure, say N.
+	  This drives the on-chip RTP controller found on ArtInChip SoCs.
+	  Capacitive panels (e.g. GT911) use their own driver instead.
+
+source "drivers/input/touchscreen/gt9xx/Kconfig"
+
 endif
