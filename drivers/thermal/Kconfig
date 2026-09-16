@@ -252,6 +252,18 @@ config THERMAL_MMIO
 	  register or shared memory, is a potential candidate to work with this
 	  driver.
 
+config ARTINCHIP_THERMAL
+	tristate "Artinchip thermal driver"
+	depends on ARCH_ARTINCHIP && ARTINCHIP_ADCIM
+	depends on HAS_IOMEM
+	depends on OF
+	default y
+	help
+	  Enable Artinchip's thermal sensor driver.
+	  It reports the CPU and GPAI temperature zones using factory
+	  calibration cells from SID, and feeds the thermal framework
+	  for throttling decisions. Enable it on all D211 boards.
+
 config HISI_THERMAL
 	tristate "Hisilicon thermal driver"
 	depends on ARCH_HISI || COMPILE_TEST
