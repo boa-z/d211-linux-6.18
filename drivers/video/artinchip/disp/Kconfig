@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: GPL-2.0-only
+config ARTINCHIP_FB
+	tristate "ArtInChip Framebuffer support"
+	depends on FB
+	select VIDEOMODE_HELPERS
+	select FB_CFB_FILLRECT
+	select FB_CFB_COPYAREA
+	select FB_CFB_IMAGEBLIT
+	default n
+	help
+          This is the driver for the ArtInChip DE, the driver is based on
+	  Linux framebuffer.
+	  It drives RGB/LVDS/DSI/DBI panels through the display engine
+	  with GE 2D acceleration. Enable it on boards with a screen,
+	  and pick the matching output and panel options below.
+
+config AIC_DISP_RGB
+	bool "ArtInChip display rgb support"
+	depends on ARTINCHIP_FB
+	default n
+	help
+	  ArtInChip display rgb support
+	  RGB is the parallel display output used by 800x480 class panels.
+	  It requires a matching RGB panel driver
+	  from the panel choice below.
+
+config AIC_DISP_LVDS
+	bool "ArtInChip display lvds support"
+	depends on ARTINCHIP_FB
+	default n
+	help
+	  ArtInChip display lvds support
+	  LVDS serializes the RGB output for longer cable runs to the
+	  panel. Enable it only with an LVDS panel and matching
+	  panel driver selected below.
+
+config AIC_DISP_MIPI_DSI
+	bool "ArtInChip display mipi-dsi support"
+	depends on ARTINCHIP_FB
+	default n
+	help
+	  ArtInChip display mipi-dsi support
+	  MIPI DSI drives smart panels over high speed serial lanes.
+	  Pair it with the panel driver matching the connected screen
+	  from the panel choice below.
+
+config AIC_DISP_MIPI_DSI_V1_0
+	bool
+	default y
+	depends on AIC_DISP_MIPI_DSI && RISCV
+	help
+	  ArtInChip display mipi-dsi v1.0
+
+config AIC_DISP_MIPI_DBI
+	bool "ArtInChip display mipi-dbi support"
+	depends on ARTINCHIP_FB
+	default n
+	help
+	  ArtInChip display mipi-dbi support
+	  MIPI DBI (I8080/SPI style) drives small smart panels.
+	  Pair it with the panel driver matching the connected screen
+	  from the panel choice below.
+
+config AIC_DSI_LEGACY_PACKET
+	bool "enable MIPI-DSI legacy packet config"
+	depends on AIC_DISP_MIPI_DSI
+	default n
+	help
+	  Choose this option if you have a need for the legacy luban
+	  sdk version support. If in doubt, say "N".
+	  Legacy packet mode keeps compatibility with first-generation
+	  DSI panels. New designs should leave it disabled.
+
+if ARTINCHIP_FB
+source "drivers/video/artinchip/disp/panel/Kconfig"
+endif

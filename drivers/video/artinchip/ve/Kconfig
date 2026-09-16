@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-2.0-only
+config ARTINCHIP_VE
+        tristate "ArtInChip Video Engine Driver"
+        default n
+	help
+	  This is the driver for the ArtInChip VE, the driver
+	  for hw video codec embedded in ArtInChip SOCs.
+	  It exposes the video engine through a char device for
+	  encode and decode offload. Enable it on boards that use
+	  hardware video codec.
