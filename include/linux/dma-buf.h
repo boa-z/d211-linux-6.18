@@ -276,6 +276,16 @@ struct dma_buf_ops {
 
 	int (*vmap)(struct dma_buf *dmabuf, struct iosys_map *map);
 	void (*vunmap)(struct dma_buf *dmabuf, struct iosys_map *map);
+
+	/**
+	 * @get_phy_addr:
+	 *
+	 * ArtInChip extension: report the physical address of the buffer so
+	 * that user space (MPP/GE/VE) can program its DMA engines directly.
+	 *
+	 * This callback is optional.
+	 */
+	int (*get_phy_addr)(struct dma_buf *dmabuf, unsigned int *phy_addr);
 };
 
 /**
