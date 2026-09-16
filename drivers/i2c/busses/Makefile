@@ -166,3 +166,6 @@ ccflags-$(CONFIG_I2C_DEBUG_BUS) := -DDEBUG
 
 obj-$(CONFIG_I2C_ARTINCHIP)	+= i2c-artinchip.o
 i2c-artinchip-objs		:= i2c-artinchip-common.o i2c-artinchip-master.o
+ifeq ($(CONFIG_I2C_ARTINCHIP_SLAVE),y)
+i2c-artinchip-objs		+= i2c-artinchip-slave.o
+endif

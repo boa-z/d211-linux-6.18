@@ -419,6 +419,14 @@ config I2C_ARTINCHIP
 	help
 	  This supports the use of the I2C interface on ArtInChip SOC
 
+config I2C_ARTINCHIP_SLAVE
+	tristate "ArtInChip I2C as slave mode"
+	depends on I2C_ARTINCHIP
+	select I2C_SLAVE
+	help
+	  This supports I2C slave mode of the ArtInChip I2C controller.
+	  If you don't know what to do here, say N.
+
 config I2C_AT91
 	tristate "Atmel AT91 I2C Two-Wire interface (TWI)"
 	depends on ARCH_MICROCHIP || COMPILE_TEST
