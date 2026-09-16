@@ -9,6 +9,60 @@ config SENSORS_LIS3LV02D
 	tristate
 	depends on INPUT
 
+config ARTINCHIP_ADCIM
+	bool "ADCIM driver for Artinchip SoC"
+	depends on ARCH_ARTINCHIP
+	help
+	  ADC Interface Management is the base module of ADC/THS/RTP
+	  in Artinchip SoC. So, select this if you want to use them first.
+	  GPAI, PSADC and the thermal sensor all sit on top of ADCIM,
+	  so this is required for any analog sensing support.
+
+config ARTINCHIP_ADCIM_DM
+	bool "ADCIM DM driver for FPGA"
+	depends on ARTINCHIP_ADCIM && (DEBUG_ON_FPGA_BOARD_ARTINCHIP || VIRTIO_BLK)
+	help
+	  It's a ADC Digital Module, which can generate signal for ADC/THS/RTP
+	  in FPGA environment. So, select this if you want to use them first.
+	  This is only useful when validating analog paths on FPGA boards;
+	  say N for production silicon.
+
+config ARTINCHIP_MTOP
+	bool "MTOP driver for Artinchip SoC"
+	depends on ARCH_ARTINCHIP
+	default n
+	help
+	  Select this if you want to know DDR bandwidth.
+	  MTOP exposes memory-throughput counters used for performance
+	  analysis and DDR frequency tuning. If unsure, say N.
+
+config ARTINCHIP_PBUS
+	bool "PBUS driver for Artinchip SoC"
+	depends on ARCH_ARTINCHIP
+	help
+	  Artinchip SoC can access the external FPGA or SRAM by PBUS.
+	  So, select this if you want to use it.
+	  PBUS is a simple parallel bus for memory-mapped peripherals;
+	  most boards leave it disabled.
+
+config ARTINCHIP_SYSCFG
+	bool "Syscfg driver for Artinchip SoC"
+	depends on ARCH_ARTINCHIP
+	help
+	  Syscfg should enable some configuration for USB/GMAC before
+	  initialization. Select this if you want to use them.
+	  It programs the shared system-control registers (PHY muxing,
+	  reference clocks) that USB and GMAC depend on at probe time.
+
+config ARTINCHIP_WRI
+	bool "WRI driver for ArtInChip SoC"
+	depends on ARCH_ARTINCHIP
+	help
+	  Select this if you want to use them.
+	  WRI is a small misc block for wakeup and reset information;
+	  it has no effect unless the board uses those features.
+	  If unsure, say N.
+
 config AD525X_DPOT
 	tristate "Analog Devices Digital Potentiometers"
 	depends on (I2C || SPI) && SYSFS
