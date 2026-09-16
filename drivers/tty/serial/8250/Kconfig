@@ -34,6 +34,16 @@ config SERIAL_8250
 	  Most people will say Y or M here, so that they can use serial mice,
 	  modems and similar devices connecting to the standard serial ports.
 
+config SERIAL_8250_ARTINCHIP
+	tristate "8250/16550 support for ArtInChip serial ports"
+	default SERIAL_8250
+	depends on SERIAL_8250 && ARCH_ARTINCHIP
+	help
+	  Select this option if you have machine with an ArtInChip SoC and
+	  wish to enable 8250/16550 serial driver for the ArtInChip serial interfaces.
+	  This covers all on-chip UARTs including the debug console.
+	  It is required for serial output, keep it enabled.
+
 config SERIAL_8250_DEPRECATED_OPTIONS
 	bool "Support 8250_core.* kernel options (DEPRECATED)"
 	depends on SERIAL_8250
