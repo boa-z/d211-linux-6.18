@@ -371,6 +371,12 @@ extern const struct spinand_manufacturer skyhigh_spinand_manufacturer;
 extern const struct spinand_manufacturer toshiba_spinand_manufacturer;
 extern const struct spinand_manufacturer winbond_spinand_manufacturer;
 extern const struct spinand_manufacturer xtx_spinand_manufacturer;
+extern const struct spinand_manufacturer zbit_spinand_manufacturer;
+extern const struct spinand_manufacturer elite_spinand_manufacturer;
+extern const struct spinand_manufacturer umtek_spinand_manufacturer;
+extern const struct spinand_manufacturer byte_spinand_manufacturer;
+extern const struct spinand_manufacturer xincun_spinand_manufacturer;
+extern const struct spinand_manufacturer dosilicon_spinand_manufacturer;
 
 /**
  * struct spinand_op_variants - SPI NAND operation variants
@@ -679,6 +685,19 @@ struct spinand_mem_ops {
  * @read_retries: the number of read retry modes supported
  * @set_read_retry: Enable/disable the read retry feature
  */
+#if IS_ENABLED(CONFIG_NAND_BBT_MANAGE)
+#define BADBLOCK_MAX_SIZE (4 * 2048 - 8)
+
+struct bad_block_ctl {
+	u16	start;
+	u16	len;
+	u8	sum;
+	u8	reserved;
+	u8	data[BADBLOCK_MAX_SIZE];
+	u16	end;
+};
+#endif
+
 struct spinand_device {
 	struct nand_device base;
 	struct spi_mem *spimem;
@@ -717,7 +736,16 @@ struct spinand_device {
 	unsigned int read_retries;
 	int (*set_read_retry)(struct spinand_device *spinand,
 			     unsigned int retry_mode);
+#if IS_ENABLED(CONFIG_NAND_BBT_MANAGE)
+	struct bad_block_ctl *bbt_ctl;
+	unsigned char enable_bbt_ctl;
+#endif
 };
+
+#if IS_ENABLED(CONFIG_NAND_BBT_MANAGE)
+void aic_nand_bbt_markbad(struct mtd_info *mtd, loff_t ofs);
+void aic_nand_bbt_init(struct spinand_device *spinand);
+#endif
 
 /**
  * mtd_to_spinand() - Get the SPI NAND device attached to an MTD instance

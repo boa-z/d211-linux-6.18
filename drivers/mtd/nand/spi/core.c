@@ -20,6 +20,8 @@
 #include <linux/spi/spi.h>
 #include <linux/spi/spi-mem.h>
 
+#include "artinchip_spinand_enc.h"
+
 int spinand_read_reg_op(struct spinand_device *spinand, u8 reg, u8 *val)
 {
 	struct spi_mem_op op = SPINAND_GET_FEATURE_1S_1S_1S_OP(reg,
@@ -405,8 +407,21 @@ static int spinand_read_from_cache_op(struct spinand_device *spinand,
 	if (spinand->flags & SPINAND_HAS_READ_PLANE_SELECT_BIT)
 		column |= req->pos.plane << fls(nanddev_page_size(nand));
 
+#ifdef CONFIG_CRYPTO_DEV_ARTINCHIP_SPIENC
+	/* Setup decryption data information */
+	ret = spinand_enc_xfer_cfg(spinand,
+				   nanddev_pos_to_offs(nand, &req->pos),
+				   req->datalen ? nanddev_page_size(nand) : 0);
+	if (ret < 0)
+		return ret;
+#endif
+
 	while (nbytes) {
+#ifdef CONFIG_CRYPTO_DEV_ARTINCHIP_SPIENC
+		ret = spinand_enc_read(spinand, rdesc, column, nbytes, buf);
+#else
 		ret = spi_mem_dirmap_read(rdesc, column, nbytes, buf);
+#endif
 		if (ret < 0)
 			return ret;
 
@@ -497,8 +512,21 @@ static int spinand_write_to_cache_op(struct spinand_device *spinand,
 	if (spinand->flags & SPINAND_HAS_PROG_PLANE_SELECT_BIT)
 		column |= req->pos.plane << fls(nanddev_page_size(nand));
 
+#ifdef CONFIG_CRYPTO_DEV_ARTINCHIP_SPIENC
+	/* Setup encryption data information */
+	ret = spinand_enc_xfer_cfg(spinand,
+				   nanddev_pos_to_offs(nand, &req->pos),
+				   req->datalen);
+	if (ret < 0)
+		return ret;
+#endif
+
 	while (nbytes) {
+#ifdef CONFIG_CRYPTO_DEV_ARTINCHIP_SPIENC
+		ret = spinand_enc_write(spinand, wdesc, column, nbytes, buf);
+#else
 		ret = spi_mem_dirmap_write(wdesc, column, nbytes, buf);
+#endif
 		if (ret < 0)
 			return ret;
 
@@ -1044,6 +1072,10 @@ static int spinand_mtd_block_markbad(struct mtd_info *mtd, loff_t offs)
 	struct nand_pos pos;
 	int ret;
 
+#ifdef CONFIG_NAND_BBT_MANAGE
+	aic_nand_bbt_markbad(mtd, offs);
+#endif
+
 	nanddev_offs_to_pos(nand, offs, &pos);
 	mutex_lock(&spinand->lock);
 	ret = nanddev_markbad(nand, &pos);
@@ -1237,6 +1269,12 @@ static const struct spinand_manufacturer *spinand_manufacturers[] = {
 	&toshiba_spinand_manufacturer,
 	&winbond_spinand_manufacturer,
 	&xtx_spinand_manufacturer,
+	&zbit_spinand_manufacturer,
+	&elite_spinand_manufacturer,
+	&umtek_spinand_manufacturer,
+	&byte_spinand_manufacturer,
+	&xincun_spinand_manufacturer,
+	&dosilicon_spinand_manufacturer,
 };
 
 static int spinand_manufacturer_match(struct spinand_device *spinand,
@@ -1716,6 +1754,16 @@ static int spinand_probe(struct spi_mem *mem)
 	if (ret)
 		return ret;
 
+#ifdef CONFIG_CRYPTO_DEV_ARTINCHIP_SPIENC
+	ret = spinand_enc_init(spinand);
+	if (ret)
+		return ret;
+#endif
+
+#ifdef CONFIG_NAND_BBT_MANAGE
+	aic_nand_bbt_init(spinand);
+#endif
+
 	ret = mtd_device_register(mtd, NULL, 0);
 	if (ret)
 		goto err_spinand_cleanup;
@@ -1741,6 +1789,9 @@ static int spinand_remove(struct spi_mem *mem)
 	if (ret)
 		return ret;
 
+#ifdef CONFIG_CRYPTO_DEV_ARTINCHIP_SPIENC
+	spinand_enc_priv_free(spinand);
+#endif
 	spinand_cleanup(spinand);
 
 	return 0;

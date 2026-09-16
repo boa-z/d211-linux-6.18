@@ -69,6 +69,35 @@ config MTD_BLOCK_RO
 	  You do not need this option for use with the DiskOnChip devices. For
 	  those, enable NFTL support (CONFIG_NFTL) instead.
 
+config NAND_BBT_MANAGE
+	bool "Use bbt partition to manage bad blocks for fast boot in nand"
+	depends on MTD && MTD_SPI_NAND
+	help
+	  ALL nand bad block is managed uniformly in bbt partition.
+	  compared with dispersion. it can save bad block read time.
+	  A dedicated flash area holds the table so bad blocks are known
+	  without scanning at boot. Enable it for fast boot on SPI NAND.
+
+config NAND_BBT_OFFSET
+	hex "Offset of bbt in nand"
+	depends on NAND_BBT_MANAGE
+	default "0xf00000"
+	help
+	  Byte offset of the bad-block-table area from the start of NAND.
+	  It must point at erase blocks reserved for the table and must
+	  not overlap UBI or other partitions. The default matches the
+	  ArtInChip D211 NAND partition layout.
+
+config NAND_BBT_RANGE
+	hex "Range of bbt in nand"
+	depends on NAND_BBT_MANAGE
+	default "0x40000"
+	help
+	  Size in bytes of the bad-block-table area. It must cover at
+	  least two erase blocks so the table survives a bad block inside
+	  the area itself. The default matches the ArtInChip D211 NAND
+	  partition layout.
+
 comment "Note that in some cases UBI block is preferred. See MTD_UBI_BLOCK."
 	depends on MTD_BLOCK || MTD_BLOCK_RO
 
