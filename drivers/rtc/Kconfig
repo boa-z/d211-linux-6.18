@@ -1567,6 +1567,16 @@ config RTC_DRV_PL031
 	  To compile this driver as a module, choose M here: the
 	  module will be called rtc-pl031.
 
+config RTC_DRV_ARTINCHIP
+	bool "Artinchip Soc RTC"
+	depends on ARCH_ARTINCHIP
+	help
+	  If you say Y here you will get support for the RTC V1.0
+	  in Artinchip SoC.
+	  The RTC keeps wall-clock time across suspend and provides
+	  alarm wakeup. Enable it on boards with a battery-backed
+	  RTC circuit.
+
 config RTC_DRV_AT91RM9200
 	tristate "AT91RM9200 or some AT91SAM9 RTC"
 	depends on ARCH_AT91 || COMPILE_TEST
