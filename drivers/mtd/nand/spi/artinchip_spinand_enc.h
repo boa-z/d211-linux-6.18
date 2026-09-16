@@ -9,6 +9,13 @@
 #include <crypto/skcipher.h>
 #include <linux/aic_spienc.h>
 
+/*
+ * The helpers are only called by the SPI-NAND core when the on-the-fly
+ * encryption is enabled; keep them compiled only in that case so the
+ * build does not warn about unused functions.
+ */
+#if IS_ENABLED(CONFIG_CRYPTO_DEV_ARTINCHIP_SPIENC)
+
 struct spinand_enc_xfer_info {
 	u32 addr; /* Cipher data address */
 	u32 clen; /* Cipher data len */
@@ -290,3 +297,5 @@ static ssize_t spinand_enc_write(struct spinand_device *spinand,
 	return op.data.nbytes;
 }
 #endif
+
+#endif /* CONFIG_CRYPTO_DEV_ARTINCHIP_SPIENC */
