@@ -1,0 +1,60 @@
+config AIC8800_USB_WLAN_SUPPORT
+	tristate "AIC8800 wlan Support"
+	help
+	  This is support for aic wifi driver.
+	  USB transport variant of the AIC8800 WLAN function driver.
+	  It needs the firmware loader below and a USB connected
+	  AIC8800 part. If unsure, say N.
+
+#choice
+#        depends on AIC8800_USB_WLAN_SUPPORT
+#        prompt "Select 8800 support platform"
+#
+#        config PLATFORM_ROCHCHIP
+#                bool "PLATFORM_ROCHCHIP"
+#                depends on AIC8800_USB_WLAN_SUPPORT
+#
+#	config PLATFORM_ALLWINNER
+#                bool "PLATFORM_ALLWINNER"
+#                depends on AIC8800_USB_WLAN_SUPPORT
+#
+#        config PLATFORM_AMLOGIC
+#                bool "PLATFORM_AMLOGIC"
+#                depends on AIC8800_USB_WLAN_SUPPORT
+#
+#        config PLATFORM_UBUNTU
+#                bool "PLATFORM_UBUNTU"
+#                depends on AIC8800_USB_WLAN_SUPPORT
+#
+#endchoice
+#
+#config USE_5G
+#	bool "AIC8800 force enable 5G"
+#        ---help---
+#          This is parameter that force enable 5G.
+#
+#config HE_FOR_OLD_KERNEL
+#	bool "AIC8800 support AX for old kernel"
+#        ---help---
+#          This is parameter that enable AX for old kernel.
+
+config ONE_TXQ
+        bool "Use single netdev TX queue"
+        depends on AIC8800_USB_WLAN_SUPPORT
+        default n
+        help
+          Enable single netdev TX queue mode. The driver will select the
+          hardware TX queue internally instead of using the kernel's
+          multi-queue mechanism. Reduces resource usage by allocating
+          fewer TX queues in the firmware.
+
+config RWNX_ROC_DUR_MAX
+	int "Maximum Remain on Channel duration (ms)"
+	depends on AIC8800_USB_WLAN_SUPPORT
+	default 500
+	range 100 1000
+	help
+	  Set the maximum duration for remain on channel operation in milliseconds.
+	  This bounds off-channel scan and P2P dwell time. The default
+	  suits typical station and AP use; raise it only when scans
+	  visibly miss access points.

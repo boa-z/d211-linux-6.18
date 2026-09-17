@@ -1,0 +1,8 @@
+config AIC_LOADFW_SUPPORT
+	tristate "AIC8800 Load Firmware Support"
+	help
+	  This is support for aic load firmware driver.
+	  It downloads firmware into the AIC8800 USB part before the
+	  WLAN function driver probes. Required together with the USB
+	  WLAN driver above. If unsure, say N.
+
