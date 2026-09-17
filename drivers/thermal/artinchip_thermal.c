@@ -761,6 +761,13 @@ static int aic_tsen_get_nvmem_cell(struct aic_tsen_dev *tsen)
 						"t1_high", "envtemp_low",
 						"envtemp_high",
 						"ldo30_bg_ctrl", "cp_version"};
+	/* Valid bit widths, matching the "bits" property of each DT cell.
+	 * The nvmem core reads raw_len (word aligned) bytes but only
+	 * sanitizes the first "bytes"; the driver consumes u32, so mask
+	 * explicitly, otherwise stale efuse bytes leak into the value
+	 * (seen as +212M garbage temperatures).
+	 */
+	u8 cell_nbits[TSEN_NVMEM_CELL_NUM] = {12, 12, 12, 12, 4, 8, 8, 6};
 
 	for (i = 0; i < TSEN_NVMEM_CELL_NUM ; i++) {
 		struct nvmem_cell *cell = NULL;
@@ -784,7 +791,7 @@ static int aic_tsen_get_nvmem_cell(struct aic_tsen_dev *tsen)
 			return -EINVAL;
 		}
 
-		tsen->cell_data[i] = *(int *)data;
+		tsen->cell_data[i] = *(int *)data & (u32)GENMASK(cell_nbits[i] - 1, 0);
 		if ((i != TSEN_THS_ENV_TEMP_LOW) && (i != TSEN_THS_ENV_TEMP_HIGH) &&
 		    (tsen->cell_data[i] == 0))
 			dev_info(dev, "%s is empty in eFuse\n", cell_name[i]);
