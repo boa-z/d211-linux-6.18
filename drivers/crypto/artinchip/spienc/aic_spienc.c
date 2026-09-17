@@ -58,9 +58,6 @@ struct aic_spienc_drvdata {
 	struct skcipher_request *req;
 	u32 tweak; /* Tweak value for hardware to generate counter */
 	u32 irq_sts;
-#ifdef CONFIG_ARTINCHIP_SPIENC_DEBUG
-	u32 bypass;
-#endif
 };
 
 struct aic_spienc_ctx {
@@ -206,14 +203,6 @@ static int aic_spienc_xcrypt(struct skcipher_request *req)
 	ret = -EINPROGRESS;
 
 	spin_lock(&user_lock);
-#ifdef CONFIG_ARTINCHIP_SPIENC_DEBUG
-	if (drvdata->bypass) {
-		struct crypto_async_request *base;
-		base = &drvdata->req->base;
-		base->complete(base, 0);
-		goto unlock;
-	}
-#endif
 	ivinfo = (struct aic_spienc_iv *)req->iv;
 
 	if (aic_spienc_attach_bus(drvdata, ivinfo->spi_id)) {
@@ -301,50 +290,8 @@ static ssize_t status_show(struct device *dev,
 }
 static DEVICE_ATTR_RO(status);
 
-#ifdef CONFIG_ARTINCHIP_SPIENC_DEBUG
-static ssize_t bypass_show(struct device *dev,
-			     struct device_attribute *devattr, char *buf)
-{
-	struct platform_device *pdev = to_platform_device(dev);
-	struct aic_spienc_drvdata *drvdata = platform_get_drvdata(pdev);
-	ssize_t ret;
-
-	spin_lock(&user_lock);
-	ret = sprintf(buf, "bypass = %d\n", drvdata->bypass);
-	spin_unlock(&user_lock);
-	return ret;
-}
-
-static ssize_t bypass_store(struct device *dev,
-			      struct device_attribute *devattr, const char *buf,
-			      size_t count)
-{
-	struct platform_device *pdev = to_platform_device(dev);
-	struct aic_spienc_drvdata *drvdata = platform_get_drvdata(pdev);
-	unsigned long val = 0;
-	int ret;
-
-	ret = kstrtoul(buf, 0, &val);
-	if (ret) {
-		dev_err(dev, "Failed to parse bypass value.\n");
-		return ret;
-	}
-	spin_lock(&user_lock);
-	if (val)
-		drvdata->bypass = 1;
-	else
-		drvdata->bypass = 0;
-	spin_unlock(&user_lock);
-	return count;
-}
-static DEVICE_ATTR_RW(bypass);
-#endif
-
 static struct attribute *spienc_attr[] = {
 	&dev_attr_status.attr,
-#ifdef CONFIG_ARTINCHIP_SPIENC_DEBUG
-	&dev_attr_bypass.attr,
-#endif
 	NULL
 };
 

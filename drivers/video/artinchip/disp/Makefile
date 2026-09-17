@@ -1,5 +1,4 @@
 # SPDX-License-Identifier: GPL-2.0-only
-ccflags-$(CONFIG_ARTINCHIP_DE_DEBUG) += -DDEBUG
 
 subdir-ccflags-y += -I$(src)/panel
 
