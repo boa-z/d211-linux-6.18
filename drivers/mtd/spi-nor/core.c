@@ -25,6 +25,7 @@
 #include <linux/spi/flash.h>
 
 #include "core.h"
+#include "artinchip_spi_nor_enc.h"
 
 /* Define max times to check status register before we give up. */
 
@@ -2098,13 +2099,34 @@ static int spi_nor_read(struct mtd_info *mtd, loff_t from, size_t len,
 	if (ret)
 		return ret;
 
+#ifdef CONFIG_CRYPTO_DEV_ARTINCHIP_SPIENC
+	/* Setup decryption data information */
+	ret = spi_nor_enc_xfer_cfg(nor, from, len);
+	if (ret < 0)
+		return ret;
+#endif
 	while (len) {
 		loff_t addr = from;
 
 		if (nor->read_proto == SNOR_PROTO_8_8_8_DTR)
 			ret = spi_nor_octal_dtr_read(nor, addr, len, buf);
+#ifdef CONFIG_CRYPTO_DEV_ARTINCHIP_SPIENC
+		else {
+			u32 page_size = nor->params->page_size;
+
+			/* Read by page, so that SPIEnc hardware can detect
+			 * empty page (all 0xFF)
+			 */
+			if (addr & (page_size - 1))
+				ret = page_size - (addr & (page_size - 1));
+			else
+				ret = min_t(ssize_t, page_size, len);
+			ret = spi_nor_enc_read(nor, addr, ret, buf);
+		}
+#else
 		else
 			ret = spi_nor_read_data(nor, addr, len, buf);
+#endif
 
 		if (ret == 0) {
 			/* We shouldn't see 0-length reads */
@@ -2209,6 +2231,13 @@ static int spi_nor_write(struct mtd_info *mtd, loff_t to, size_t len,
 	if (ret)
 		return ret;
 
+#ifdef CONFIG_CRYPTO_DEV_ARTINCHIP_SPIENC
+	/* Setup encryption data information */
+	ret = spi_nor_enc_xfer_cfg(nor, to, len);
+	if (ret < 0)
+		return ret;
+#endif
+
 	for (i = 0; i < len; ) {
 		ssize_t written;
 		loff_t addr = to + i;
@@ -2229,9 +2258,15 @@ static int spi_nor_write(struct mtd_info *mtd, loff_t to, size_t len,
 		if (nor->write_proto == SNOR_PROTO_8_8_8_DTR)
 			ret = spi_nor_octal_dtr_write(nor, addr, page_remain,
 						      buf + i);
+#ifdef CONFIG_CRYPTO_DEV_ARTINCHIP_SPIENC
+		else
+			ret = spi_nor_enc_write(nor, addr, page_remain,
+						buf + i);
+#else
 		else
 			ret = spi_nor_write_data(nor, addr, page_remain,
 						 buf + i);
+#endif
 		spi_nor_unlock_device(nor);
 		if (ret < 0)
 			goto write_err;
@@ -3722,6 +3757,12 @@ static int spi_nor_probe(struct spi_mem *spimem)
 	if (!nor->mtd.name)
 		nor->mtd.name = spi_mem_get_name(spimem);
 
+#ifdef CONFIG_CRYPTO_DEV_ARTINCHIP_SPIENC
+	ret = spi_nor_enc_init(nor);
+	if (ret)
+		return ret;
+#endif
+
 	/*
 	 * For some (historical?) reason many platforms provide two different
 	 * names in flash_platform_data: "name" and "type". Quite often name is
@@ -3773,6 +3814,9 @@ static int spi_nor_remove(struct spi_mem *spimem)
 
 	spi_nor_restore(nor);
 
+#ifdef CONFIG_CRYPTO_DEV_ARTINCHIP_SPIENC
+	spi_nor_enc_priv_free(nor);
+#endif
 	/* Clean up MTD stuff. */
 	return mtd_device_unregister(&nor->mtd);
 }
